@@ -10,6 +10,61 @@
 -  **MCP 标准** - 完全兼容 MCP 协议，与 Claude Desktop 无缝集成
 -  **功能完整** - 支持笔记获取、搜索、用户信息等核心功能
 
+### Claude Desktop 集成
+
+在 Claude Desktop 的配置文件中添加以下内容：
+
+#### macOS
+编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`：
+
+#### Windows
+编辑 `%APPDATA%\Claude\claude_desktop_config.json`：
+
+```json
+{
+  "mcpServers": {
+    "xhs-mcp": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "xhs_mcp"],
+      "cwd": "/path/to/xhs-mcp",
+      "env": {
+        "XHS_A1_COOKIE": "你的a1cookie值"
+      }
+    }
+  }
+}
+```
+
+或者如果你使用了全局安装：
+
+```json
+{
+  "mcpServers": {
+    "xhs-mcp": {
+      "command": "xhs-mcp",
+      "env": {
+        "XHS_A1_COOKIE": "你的a1cookie值"
+      }
+    }
+  }
+}
+```
+
+## 使用示例
+
+在 Claude 中，你可以这样使用：
+
+```
+# 搜索美食相关笔记
+请帮我搜索小红书上关于"成都美食"的笔记
+
+# 获取特定用户的笔记
+请获取用户ID为 "xxx" 的最新笔记
+
+# 获取笔记详情
+请获取笔记ID为 "xxx" 的详细内容
+```
+
 ##  快速开始
 
 ### 前置要求
@@ -58,47 +113,7 @@ xhs-mcp
 5. 在左侧找到 **Cookies** → **www.xiaohongshu.com**
 6. 找到名为 `a1` 的 Cookie，复制它的值
 
-### Claude Desktop 集成
-
-在 Claude Desktop 的配置文件中添加以下内容：
-
-#### macOS
-编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`：
-
-#### Windows
-编辑 `%APPDATA%\Claude\claude_desktop_config.json`：
-
-```json
-{
-  "mcpServers": {
-    "xhs-mcp": {
-      "command": "uv",
-      "args": ["run", "python", "-m", "xhs_mcp"],
-      "cwd": "/path/to/xhs-mcp",
-      "env": {
-        "XHS_A1_COOKIE": "你的a1cookie值"
-      }
-    }
-  }
-}
-```
-
-或者如果你使用了全局安装：
-
-```json
-{
-  "mcpServers": {
-    "xhs-mcp": {
-      "command": "xhs-mcp",
-      "env": {
-        "XHS_A1_COOKIE": "你的a1cookie值"
-      }
-    }
-  }
-}
-```
-
-## 🛠️ 功能介绍
+##  功能介绍
 
 ### MCP Tools（工具）
 
@@ -144,7 +159,7 @@ get_user_info(user_id="用户ID")
 - `config://api` - API 配置信息
 - `user://{user_id}/profile` - 用户资料缓存
 
-## 📝 使用示例
+## 使用示例
 
 在 Claude 中，你可以这样使用：
 
@@ -159,7 +174,7 @@ get_user_info(user_id="用户ID")
 请获取笔记ID为 "xxx" 的详细内容
 ```
 
-## ⚙️ 配置选项
+## 配置选项
 
 通过环境变量配置：
 
@@ -265,9 +280,6 @@ export PYTHONPATH=$PYTHONPATH:src
 export XHS_DEBUG=1
 ```
 
-## 📄 许可证
-
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
 
 ---
 
