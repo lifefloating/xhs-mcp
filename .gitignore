@@ -206,3 +206,6 @@ htmlcov/
 
 # MCP specific
 *.mcp_session
+
+# markdown
+xhs-tech.md
