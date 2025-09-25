@@ -286,6 +286,5 @@ export XHS_DEBUG=1
 
 ## TODO
 
- 1. ci/cd git提交规范
- 2. 测试
- 3. 提供例子
+- 测试mcp功能
+- 优化文档
