@@ -66,12 +66,12 @@ jobs:
     - name: Smoke test (wheel)
       run: |
         WHEEL_FILE=$(find dist -name "*.whl" -type f)
-        uv run --isolated --no-project -p 3.12 --with "$WHEEL_FILE" -- python -c "from xhs_mcp import XhsServer; server = XhsServer(); print('Wheel package works'); print('XhsServer module:', server.__class__.__module__)"
+        uv run --isolated --no-project -p 3.12 --with "$WHEEL_FILE" -- python -c "from xhs_mcp import mcp; print('Wheel package works'); print('MCP server type:', type(mcp).__name__)"
 
     - name: Smoke test (source distribution)
       run: |
         TARBALL_FILE=$(find dist -name "*.tar.gz" -type f)
-        uv run --isolated --no-project -p 3.12 --with "$TARBALL_FILE" -- python -c "from xhs_mcp import XhsServer; server = XhsServer(); print('Source distribution works'); print('XhsServer module:', server.__class__.__module__)"
+        uv run --isolated --no-project -p 3.12 --with "$TARBALL_FILE" -- python -c "from xhs_mcp import mcp; print('Source distribution works'); print('MCP server type:', type(mcp).__name__)"
 
     - name: Check if version exists on PyPI
       run: |

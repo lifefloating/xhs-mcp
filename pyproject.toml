@@ -1,6 +1,6 @@
 [project]
 name = "xhs-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Model Context Protocol server for accessing Xiaohongshu (Little Red Book) content"
 authors = [
     { name = "fuyou", email = "imshuazi@126.com" }
@@ -43,7 +43,7 @@ asyncio_mode = "auto"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.0"
+version = "0.1.1"
 tag_format = "v$version"
 version_files = [
     "pyproject.toml:version"
