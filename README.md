@@ -290,9 +290,3 @@ export XHS_DEBUG=1
 
 
 ---
-
-
-## TODO
-
-- 测试mcp功能
-- 优化文档
