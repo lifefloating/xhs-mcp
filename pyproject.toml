@@ -1,5 +1,5 @@
 [project]
-name = "xhs-mcp"
+name = "xhs-mcp-fy"
 version = "0.1.2"
 description = "A Model Context Protocol server for accessing Xiaohongshu (Little Red Book) content"
 authors = [
