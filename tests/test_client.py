@@ -1,7 +1,6 @@
 """Tests for XHS client module."""
 
-import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 import pytest
 import httpx
 
@@ -13,10 +12,7 @@ from xhs_mcp.config import Config
 def test_config():
     """Test configuration fixture."""
     return Config(
-        a1_cookie="test_cookie",
-        api_host="https://test.api.com",
-        timeout=30,
-        max_retries=3
+        a1_cookie="test_cookie", api_host="https://test.api.com", timeout=30, max_retries=3
     )
 
 
@@ -50,11 +46,11 @@ async def test_get_user_posted_success(test_config, mock_xhshow):
         "data": {
             "notes": [
                 {"note_id": "123", "title": "Test Note"},
-                {"note_id": "456", "title": "Another Note"}
+                {"note_id": "456", "title": "Another Note"},
             ],
             "cursor": "next_cursor",
-            "has_more": True
-        }
+            "has_more": True,
+        },
     }
 
     async with XHSClient(test_config) as client:
@@ -77,12 +73,7 @@ async def test_get_note_by_id_success(test_config, mock_xhshow):
     mock_response_data = {
         "code": 0,
         "success": True,
-        "data": {
-            "note_id": "123",
-            "title": "Test Note",
-            "desc": "Test description",
-            "images": []
-        }
+        "data": {"note_id": "123", "title": "Test Note", "desc": "Test description", "images": []},
     }
 
     async with XHSClient(test_config) as client:
@@ -107,10 +98,10 @@ async def test_search_notes_success(test_config, mock_xhshow):
         "data": {
             "items": [
                 {"note_id": "123", "title": "Search Result 1"},
-                {"note_id": "456", "title": "Search Result 2"}
+                {"note_id": "456", "title": "Search Result 2"},
             ],
-            "total": 100
-        }
+            "total": 100,
+        },
     }
 
     async with XHSClient(test_config) as client:
@@ -129,11 +120,7 @@ async def test_search_notes_success(test_config, mock_xhshow):
 @pytest.mark.asyncio
 async def test_api_error_handling(test_config, mock_xhshow):
     """Test API error handling."""
-    error_response = {
-        "code": -1,
-        "msg": "API Error",
-        "success": False
-    }
+    error_response = {"code": -1, "msg": "API Error", "success": False}
 
     async with XHSClient(test_config) as client:
         with patch.object(client.session, "get") as mock_get:
@@ -149,11 +136,7 @@ async def test_api_error_handling(test_config, mock_xhshow):
 @pytest.mark.asyncio
 async def test_rate_limit_error(test_config, mock_xhshow):
     """Test rate limit error handling."""
-    rate_limit_response = {
-        "code": -100,
-        "msg": "请求频率限制",
-        "success": False
-    }
+    rate_limit_response = {"code": -100, "msg": "请求频率限制", "success": False}
 
     async with XHSClient(test_config) as client:
         with patch.object(client.session, "get") as mock_get:
@@ -174,7 +157,7 @@ async def test_http_error_handling(test_config, mock_xhshow):
             mock_get.side_effect = httpx.HTTPStatusError(
                 "404 Not Found",
                 request=MagicMock(),
-                response=MagicMock(status_code=404, text="Not Found")
+                response=MagicMock(status_code=404, text="Not Found"),
             )
 
             with pytest.raises(APIError, match="HTTP 404"):
@@ -187,7 +170,7 @@ async def test_user_info_caching(test_config, mock_xhshow):
     mock_response_data = {
         "code": 0,
         "success": True,
-        "data": {"user_id": "123", "nickname": "Test User"}
+        "data": {"user_id": "123", "nickname": "Test User"},
     }
 
     async with XHSClient(test_config) as client:

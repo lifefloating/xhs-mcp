@@ -27,7 +27,7 @@ class Config:
             a1_cookie=a1_cookie,
             api_host=os.getenv("XHS_API_HOST", "https://edith.xiaohongshu.com"),
             timeout=int(os.getenv("XHS_TIMEOUT", "30")),
-            max_retries=int(os.getenv("XHS_MAX_RETRIES", "3"))
+            max_retries=int(os.getenv("XHS_MAX_RETRIES", "3")),
         )
 
     @classmethod

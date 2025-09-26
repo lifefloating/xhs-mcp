@@ -46,11 +46,7 @@ async def get_client() -> XHSClient:
 
 
 @mcp.tool()
-async def get_user_notes(
-    user_id: str,
-    cursor: str = "",
-    num: int = 30
-) -> Dict[str, Any]:
+async def get_user_notes(user_id: str, cursor: str = "", num: int = 30) -> Dict[str, Any]:
     """
     获取指定用户发布的笔记列表
 
@@ -74,7 +70,7 @@ async def get_user_notes(
                 "notes_count": len(notes),
                 "notes": notes,
                 "cursor": result["data"].get("cursor", ""),
-                "has_more": result["data"].get("has_more", False)
+                "has_more": result["data"].get("has_more", False),
             }
         else:
             return {"success": False, "error": "Failed to fetch user notes", "raw_response": result}
@@ -104,15 +100,18 @@ async def get_note_detail(
         client = await get_client()
         # 如果提供了 xsec_token，优先按 prefer_method 请求
         pm = prefer_method if xsec_token else "GET"
-        result = await client.get_note_by_id(note_id, xsec_source, xsec_token=xsec_token, prefer_method=pm)
+        result = await client.get_note_by_id(
+            note_id, xsec_source, xsec_token=xsec_token, prefer_method=pm
+        )
 
         if result.get("success") and "data" in result:
-            return {
-                "success": True,
-                "note": result["data"]
-            }
+            return {"success": True, "note": result["data"]}
         else:
-            return {"success": False, "error": "Failed to fetch note detail", "raw_response": result}
+            return {
+                "success": False,
+                "error": "Failed to fetch note detail",
+                "raw_response": result,
+            }
 
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -120,11 +119,7 @@ async def get_note_detail(
 
 @mcp.tool()
 async def search_notes(
-    keyword: str,
-    page: int = 1,
-    page_size: int = 20,
-    sort: str = "general",
-    note_type: str = "0"
+    keyword: str, page: int = 1, page_size: int = 20, sort: str = "general", note_type: str = "0"
 ) -> Dict[str, Any]:
     """
     搜索小红书笔记
@@ -152,19 +147,26 @@ async def search_notes(
                 "notes_count": len(notes),
                 "notes": notes,
                 "page": page,
-                "has_more": len(notes) == page_size
+                "has_more": len(notes) == page_size,
             }
         elif result.get("success") is False:
             # Handle auth issues specifically
             if "无登录信息" in result.get("msg", ""):
                 import os
+
                 cookie = os.getenv("XHS_A1_COOKIE", "NOT_SET")
                 return {
                     "success": False,
-                    "error": f"Authentication failed. Cookie value: {cookie[:20]}..." if cookie != "NOT_SET" else "XHS_A1_COOKIE not set",
-                    "raw_response": result
+                    "error": f"Authentication failed. Cookie value: {cookie[:20]}..."
+                    if cookie != "NOT_SET"
+                    else "XHS_A1_COOKIE not set",
+                    "raw_response": result,
                 }
-            return {"success": False, "error": result.get("msg", "Search failed"), "raw_response": result}
+            return {
+                "success": False,
+                "error": result.get("msg", "Search failed"),
+                "raw_response": result,
+            }
         else:
             return {"success": False, "error": "Search failed", "raw_response": result}
 
@@ -173,14 +175,15 @@ async def search_notes(
         return {"success": False, "error": f"Configuration error: {str(e)}"}
     except Exception as e:
         import os
+
         cookie = os.getenv("XHS_A1_COOKIE", "NOT_SET")
         return {
             "success": False,
             "error": str(e),
             "debug_info": {
                 "cookie_status": "present" if cookie != "NOT_SET" else "missing",
-                "cookie_prefix": cookie[:20] if cookie != "NOT_SET" else None
-            }
+                "cookie_prefix": cookie[:20] if cookie != "NOT_SET" else None,
+            },
         }
 
 
@@ -200,10 +203,7 @@ async def get_user_info(user_id: str) -> Dict[str, Any]:
         result = await client.get_user_info(user_id)
 
         if result.get("success") and "data" in result:
-            return {
-                "success": True,
-                "user": result["data"]
-            }
+            return {"success": True, "user": result["data"]}
         else:
             return {"success": False, "error": "Failed to fetch user info", "raw_response": result}
 
@@ -220,9 +220,9 @@ def get_api_config() -> str:
             "user_posted": "/api/sns/web/v1/user_posted",
             "note_detail": "/api/sns/web/v1/feed",
             "search": "/api/sns/web/v1/search/notes",
-            "user_info": "/api/sns/web/v1/user/otherinfo"
+            "user_info": "/api/sns/web/v1/user/otherinfo",
         },
-        "description": "小红书 Web API 端点配置"
+        "description": "小红书 Web API 端点配置",
     }
     return json.dumps(config_data, ensure_ascii=False, indent=2)
 

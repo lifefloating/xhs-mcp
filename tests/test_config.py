@@ -1,6 +1,5 @@
 """Tests for configuration module."""
 
-import os
 import pytest
 
 from xhs_mcp.config import Config
@@ -50,7 +49,7 @@ def test_config_from_dict():
         "a1_cookie": "dict_cookie",
         "api_host": "https://dict.api.com",
         "timeout": 45,
-        "max_retries": 5
+        "max_retries": 5,
     }
 
     config = Config.from_dict(data)

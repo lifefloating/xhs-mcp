@@ -12,12 +12,16 @@ from .config import Config
 
 class XHSError(Exception):
     """Base exception for XHS client errors."""
+
     pass
 
 
 class APIError(XHSError):
     """API call error."""
-    def __init__(self, message: str, status_code: Optional[int] = None, response: Optional[Any] = None):
+
+    def __init__(
+        self, message: str, status_code: Optional[int] = None, response: Optional[Any] = None
+    ):
         super().__init__(message)
         self.status_code = status_code
         self.response = response
@@ -25,6 +29,7 @@ class APIError(XHSError):
 
 class RateLimitError(APIError):
     """Rate limit exceeded error."""
+
     pass
 
 
@@ -44,7 +49,7 @@ class XHSClient:
         self.session = httpx.AsyncClient(
             headers=self._get_base_headers(),
             timeout=httpx.Timeout(self.config.timeout),
-            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20)
+            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
         )
         return self
 
@@ -72,21 +77,19 @@ class XHSClient:
     ) -> Dict[str, Any]:
         """Make HTTP request with signature."""
         if not self.session:
-            raise RuntimeError("Client not initialized. Use 'async with XHSClient(config)' or call __aenter__")
+            raise RuntimeError(
+                "Client not initialized. Use 'async with XHSClient(config)' or call __aenter__"
+            )
 
         # Generate signature
         try:
             if method == "GET":
                 signature = self.xhshow.sign_xs_get(
-                    uri=uri,
-                    a1_value=self.config.a1_cookie,
-                    params=params or {}
+                    uri=uri, a1_value=self.config.a1_cookie, params=params or {}
                 )
             else:
                 signature = self.xhshow.sign_xs_post(
-                    uri=uri,
-                    a1_value=self.config.a1_cookie,
-                    payload=payload or {}
+                    uri=uri, a1_value=self.config.a1_cookie, payload=payload or {}
                 )
         except Exception as e:
             raise APIError(f"Failed to generate signature: {str(e)}")
@@ -103,15 +106,11 @@ class XHSClient:
         try:
             if method == "GET":
                 response = await self.session.get(
-                    f"{self.base_url}{uri}",
-                    params=params,
-                    headers=headers
+                    f"{self.base_url}{uri}", params=params, headers=headers
                 )
             else:
                 response = await self.session.post(
-                    f"{self.base_url}{uri}",
-                    json=payload,
-                    headers=headers
+                    f"{self.base_url}{uri}", json=payload, headers=headers
                 )
 
             response.raise_for_status()
@@ -123,12 +122,12 @@ class XHSClient:
                     raise RateLimitError(
                         data.get("msg", "Rate limit exceeded"),
                         status_code=data.get("code"),
-                        response=data
+                        response=data,
                     )
                 raise APIError(
                     data.get("msg", f"API error: {data.get('code')}"),
                     status_code=data.get("code"),
-                    response=data
+                    response=data,
                 )
 
             return data
@@ -136,7 +135,7 @@ class XHSClient:
         except httpx.HTTPStatusError as e:
             raise APIError(
                 f"HTTP {e.response.status_code}: {e.response.text}",
-                status_code=e.response.status_code
+                status_code=e.response.status_code,
             )
         except httpx.RequestError as e:
             raise APIError(f"Request failed: {str(e)}")
@@ -144,23 +143,18 @@ class XHSClient:
             raise APIError(f"Invalid JSON response: {str(e)}")
 
     async def get_user_posted(
-        self,
-        user_id: str,
-        cursor: str = "",
-        num: int = 30
+        self, user_id: str, cursor: str = "", num: int = 30
     ) -> Dict[str, Any]:
         """Get user's posted notes."""
         params = {
             "num": str(min(num, 30)),  # Max 30 per request
             "cursor": cursor,
             "user_id": user_id,
-            "image_formats": "jpg,webp,avif"
+            "image_formats": "jpg,webp,avif",
         }
 
         return await self._make_request(
-            method="GET",
-            uri="/api/sns/web/v1/user_posted",
-            params=params
+            method="GET", uri="/api/sns/web/v1/user_posted", params=params
         )
 
     async def get_note_by_id(
@@ -235,7 +229,7 @@ class XHSClient:
         page: int = 1,
         page_size: int = 20,
         sort: str = "general",
-        note_type: str = "0"
+        note_type: str = "0",
     ) -> Dict[str, Any]:
         """Search for notes."""
         payload = {
@@ -245,13 +239,11 @@ class XHSClient:
             "search_id": str(int(time.time() * 1000)),
             "sort": sort,  # general, time_descending, popularity_descending
             "note_type": note_type,  # 0: all, 1: video, 2: image
-            "image_formats": ["jpg", "webp", "avif"]
+            "image_formats": ["jpg", "webp", "avif"],
         }
 
         return await self._make_request(
-            method="POST",
-            uri="/api/sns/web/v1/search/notes",
-            payload=payload
+            method="POST", uri="/api/sns/web/v1/search/notes", payload=payload
         )
 
     async def get_user_info(self, user_id: str) -> Dict[str, Any]:
@@ -260,14 +252,10 @@ class XHSClient:
         if user_id in self._user_cache:
             return self._user_cache[user_id]
 
-        params = {
-            "target_user_id": user_id
-        }
+        params = {"target_user_id": user_id}
 
         result = await self._make_request(
-            method="GET",
-            uri="/api/sns/web/v1/user/otherinfo",
-            params=params
+            method="GET", uri="/api/sns/web/v1/user/otherinfo", params=params
         )
 
         # Cache the result
