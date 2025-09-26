@@ -166,22 +166,68 @@ class XHSClient:
     async def get_note_by_id(
         self,
         note_id: str,
-        xsec_source: str = "pc_user"
+        xsec_source: str = "pc_user",
+        xsec_token: Optional[str] = None,
+        prefer_method: str = "GET",
     ) -> Dict[str, Any]:
-        """Get note details by ID."""
+        """Get note details by ID.
+
+        Tries the preferred HTTP method first, and falls back to the other
+        method on 404/405 in case the endpoint expectation changes.
+        """
+        # Common parameters/payload
         params = {
             "source_note_id": note_id,
             "image_formats": "jpg,webp,avif",
             "extra": '{"need_body_topic":"1"}',
             "xsec_source": xsec_source,
-            "xsec_token": ""
         }
+        if xsec_token is not None:
+            params["xsec_token"] = xsec_token
 
-        return await self._make_request(
-            method="GET",
-            uri="/api/sns/web/v1/feed",
-            params=params
-        )
+        async def _call(method: str) -> Dict[str, Any]:
+            if method == "GET":
+                return await self._make_request(
+                    method="GET",
+                    uri="/api/sns/web/v1/feed",
+                    params={**params, "xsec_token": params.get("xsec_token", "")},
+                )
+            else:
+                # For POST, send as JSON payload
+                payload = {
+                    "source_note_id": note_id,
+                    "image_formats": ["jpg", "webp", "avif"],
+                    "extra": {"need_body_topic": "1"},
+                    "xsec_source": xsec_source,
+                }
+                if xsec_token is not None:
+                    payload["xsec_token"] = xsec_token
+                return await self._make_request(
+                    method="POST",
+                    uri="/api/sns/web/v1/feed",
+                    payload=payload,
+                )
+
+        # Choose order based on preference
+        methods = [prefer_method.upper(), "POST" if prefer_method.upper() == "GET" else "GET"]
+
+        last_error: Optional[APIError] = None
+        for method in methods:
+            try:
+                return await _call(method)
+            except APIError as e:
+                last_error = e
+                # Fallback only on typical method errors
+                if e.status_code in (404, 405):
+                    continue
+                # For other errors, raise immediately
+                raise
+
+        # If both attempts failed, raise the last error
+        if last_error:
+            raise last_error
+        # Should not reach here
+        return {"success": False, "error": "Unknown error"}
 
     async def get_search_notes(
         self,

@@ -12,23 +12,30 @@
 
 ### Claude Desktop 集成
 
-在 Claude Desktop 的配置文件中添加以下内容：
+#### 方法一：使用 claude mcp add 命令（推荐）
 
-#### macOS
+```bash
+claude mcp add xhs-mcp -e XHS_A1_COOKIE="your_a1_cookie_value" -- uv -directory "/path/to/xhs-mcp" run python -m xhs_mcp
+```
+
+#### 方法二：手动编辑配置文件
+
+##### macOS
 编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`：
 
-#### Windows
+##### Windows
 编辑 `%APPDATA%\Claude\claude_desktop_config.json`：
 
 ```json
 {
   "mcpServers": {
     "xhs-mcp": {
+      "type": "stdio",
       "command": "uv",
       "args": ["run", "python", "-m", "xhs_mcp"],
       "cwd": "/path/to/xhs-mcp",
       "env": {
-        "XHS_A1_COOKIE": "你的a1cookie值"
+        "XHS_A1_COOKIE": "your_a1_cookie_value"
       }
     }
   }
@@ -41,9 +48,10 @@
 {
   "mcpServers": {
     "xhs-mcp": {
+      "type": "stdio",
       "command": "xhs-mcp",
       "env": {
-        "XHS_A1_COOKIE": "你的a1cookie值"
+        "XHS_A1_COOKIE": "your_a1_cookie_value"
       }
     }
   }

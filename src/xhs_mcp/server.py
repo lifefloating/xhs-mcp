@@ -86,7 +86,9 @@ async def get_user_notes(
 @mcp.tool()
 async def get_note_detail(
     note_id: str,
-    xsec_source: str = "pc_user"
+    xsec_source: str = "pc_user",
+    xsec_token: str | None = None,
+    prefer_method: str = "GET",
 ) -> Dict[str, Any]:
     """
     获取笔记详细内容
@@ -100,7 +102,9 @@ async def get_note_detail(
     """
     try:
         client = await get_client()
-        result = await client.get_note_by_id(note_id, xsec_source)
+        # 如果提供了 xsec_token，优先按 prefer_method 请求
+        pm = prefer_method if xsec_token else "GET"
+        result = await client.get_note_by_id(note_id, xsec_source, xsec_token=xsec_token, prefer_method=pm)
 
         if result.get("success") and "data" in result:
             return {
@@ -150,11 +154,34 @@ async def search_notes(
                 "page": page,
                 "has_more": len(notes) == page_size
             }
+        elif result.get("success") is False:
+            # Handle auth issues specifically
+            if "无登录信息" in result.get("msg", ""):
+                import os
+                cookie = os.getenv("XHS_A1_COOKIE", "NOT_SET")
+                return {
+                    "success": False,
+                    "error": f"Authentication failed. Cookie value: {cookie[:20]}..." if cookie != "NOT_SET" else "XHS_A1_COOKIE not set",
+                    "raw_response": result
+                }
+            return {"success": False, "error": result.get("msg", "Search failed"), "raw_response": result}
         else:
             return {"success": False, "error": "Search failed", "raw_response": result}
 
+    except ValueError as e:
+        # Config initialization error
+        return {"success": False, "error": f"Configuration error: {str(e)}"}
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        import os
+        cookie = os.getenv("XHS_A1_COOKIE", "NOT_SET")
+        return {
+            "success": False,
+            "error": str(e),
+            "debug_info": {
+                "cookie_status": "present" if cookie != "NOT_SET" else "missing",
+                "cookie_prefix": cookie[:20] if cookie != "NOT_SET" else None
+            }
+        }
 
 
 @mcp.tool()
